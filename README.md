@@ -2,6 +2,9 @@
 
 A Python application for interacting with the FreshService API, featuring both a programmatic interface and a GUI for creating tickets and managing requesters.
 
+<img width="897" height="626" alt="image" src="https://github.com/user-attachments/assets/00730a5d-dc00-4bf4-b575-7c326a738eca" />
+
+
 ## Features
 
 - **FreshService API Integration**: Complete Python wrapper for FreshService ticket management
