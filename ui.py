@@ -84,7 +84,7 @@ class App(customtkinter.CTk):
 
     def __init__(self):
         super().__init__()
-        self.title("GSN - Easy Ticket v0.2")
+        self.title("Easy Ticket v0.1")
         self.geometry(f"{App.WIDTH}x{App.HEIGHT}")
         self.resizable(False, False)
 
@@ -96,7 +96,7 @@ class App(customtkinter.CTk):
             bg_color=["gray86", "gray17"],
             font=customtkinter.CTkFont("Roboto", size=13, underline=1),
             width=140,
-            text="Brandon Yates",
+            text="Brand07",
         )
         self.about_label.place(x=40, y=550)
 
