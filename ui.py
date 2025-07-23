@@ -215,7 +215,7 @@ class App(customtkinter.CTk):
         subject = "Issue Reported by " + requester_name.title()
         description = self.description_box.get("1.0", "end-1c")
         category = self.category_selector.get()
-        email = f"{self.first_name_entry.get().lower()}.{self.last_name_entry.get().lower()}@taylormadegolf.com"
+        email = f"{self.first_name_entry.get().lower()}.{self.last_name_entry.get().lower()}"
         requester_id = self.get_requester_id(email)
 
         if not category or not description:
@@ -283,7 +283,7 @@ class App(customtkinter.CTk):
                     return requester.get("id")
         return None
 
-    def clear_entries(self):
+    def clear_entries(self):  # noqa: F811
         """
         Clears all input fields in the UI.
         """
@@ -295,7 +295,7 @@ class App(customtkinter.CTk):
         self.ticket_type_selector.set("")
         print("All entries cleared.")
 
-    def show_error(self, message):
+    def show_error(self, message):  # noqa: F811
         CTkMessagebox(title="Error", message=message, icon="cancel")
 
     def show_success(self, message):
