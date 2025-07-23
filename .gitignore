@@ -144,3 +144,6 @@ cython_debug/
 output/
 
 apex_import.py
+
+#IDE Files
+.idea/
