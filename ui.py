@@ -1,6 +1,6 @@
 import customtkinter
 from CTkMessagebox import CTkMessagebox
-from fresh_new import FreshServiceAPI
+from fresh import FreshServiceAPI
 from dotenv import load_dotenv
 import requests
 import json
