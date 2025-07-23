@@ -207,19 +207,6 @@ class App(customtkinter.CTk):
         CTkMessagebox(title="Error", message=message, icon="cancel").show()
         print(f"Error: {message}")
 
-    def send_to_teams(self, message):
-        """
-        Sends a message to Microsoft Teams using a webhook.
-        """
-        webhook_url = os.getenv("WEBHOOK")
-        payload = {"text": message}
-        response = requests.post(webhook_url, json=payload)
-        if response.status_code == 200:
-            print("Message sent to Teams successfully.")
-            return True
-        else:
-            print(f"Failed to send message to Teams: {response.status_code}")
-            return False
 
     def create_ticket(self):
         """
@@ -249,7 +236,7 @@ class App(customtkinter.CTk):
             "status": 2,
             "requester_id": requester_id,
             "responder_id": None,
-            "group_id": 14000150679,  # To be set after fetching groups
+            "group_id": None,  # Set your group ID here.
             "custom_fields": {
                 "please_select_the_service": service_field_map.get(category, "Other")
             },
@@ -276,15 +263,8 @@ class App(customtkinter.CTk):
             elif "ticket" in result and "id" in result["ticket"]:
                 ticket_id = result["ticket"]["id"]
         if ticket_id:
-            ticket_url = f"https://tmgolf.freshservice.com/helpdesk/tickets/{ticket_id}"
-            self.send_to_teams(
-                f"**New ticket created:**\n\n"
-                f"**Requester:** {requester_name}\n"
-                f"**Subject:** {ticket_data['subject']}\n"
-                f"**Category:** {category}\n"
-                f"**Description:** {description}\n"
-                f"**Ticket URL:** {ticket_url}"
-            )
+            ticket_url = f"https://domain.freshservice.com/helpdesk/tickets/{ticket_id}" #Replace 'domain' with your Freshservice domain
+            print(f"Ticket created successfully: {ticket_url}")
             self.show_success("Ticket created successfully!")
         else:
             self.show_error(
