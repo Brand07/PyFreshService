@@ -239,9 +239,9 @@ class App(customtkinter.CTk):
             "status": 2,
             "requester_id": requester_id,
             "responder_id": None,
-            "group_id": None,  # Set your group ID here.
+            "group_id": None,#int(os.getenv("GROUP_ID")),  # Load your group ID in the .env file as int
             "custom_fields": {
-                "please_select_the_service": service_field_map.get(category, "Other")
+            "please_select_the_service": service_field_map.get(category, "Other")
             },
         }
 
