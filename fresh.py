@@ -43,6 +43,7 @@ class FreshServiceAPI:
         requester_id=None,
         responder_id=None,
         group_id=None,
+        location=None,
     ):
         url = self._build_url("tickets")
         response = requests.post(
@@ -58,7 +59,10 @@ class FreshServiceAPI:
                 "requester_id": requester_id,
                 "group_id": group_id,  # Group where the ticket should be assigned.
                 "responder_id": responder_id,  # Who the ticket should be assigned
-                "custom_fields": {"please_select_the_service": category},
+                "custom_fields": {
+                    "please_select_the_service": category,
+                    "location": "US"
+                },
             },
         )
 
