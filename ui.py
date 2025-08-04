@@ -47,6 +47,8 @@ service_field_map = {
     "Laptop Issue": "Laptop",
     "Desktop Issue": "Desktop",
     "Network Connectivity": "Network",
+    "Wi-Fi" : "Wi-Fi",
+    "WorkDay" : "WorkDay",
     "Printer Issue": "Printer",
     "Hardware Request": "Hardware Refresh",
     "Other": "Other",
@@ -67,6 +69,8 @@ ticket_categories = [
     "Hardware Request",
     "Other",
     "WorldShip",
+    "WorkDay",
+    "Wi-Fi",
     "RF Gun",
 ]
 
@@ -215,7 +219,7 @@ class App(customtkinter.CTk):
         subject = "Issue Reported by " + requester_name.title()
         description = self.description_box.get("1.0", "end-1c")
         category = self.category_selector.get()
-        email = f"{self.first_name_entry.get().lower()}.{self.last_name_entry.get().lower()}"
+        email = f"{self.first_name_entry.get().lower()}.{self.last_name_entry.get().lower()}{os.getenv('EMAIL_DOMAIN')}"
         requester_id = self.get_requester_id(email)
 
         if not category or not description:
@@ -262,7 +266,7 @@ class App(customtkinter.CTk):
             elif "ticket" in result and "id" in result["ticket"]:
                 ticket_id = result["ticket"]["id"]
         if ticket_id:
-            ticket_url = f"https://domain.freshservice.com/helpdesk/tickets/{ticket_id}" #Replace 'domain' with your Freshservice domain
+            ticket_url = f"https://{os.getenv("DOMAIN")}.freshservice.com/helpdesk/tickets/{ticket_id}" #Replace 'domain' with your Freshservice domain
             print(f"Ticket created successfully: {ticket_url}")
             self.show_success("Ticket created successfully!")
         else:
