@@ -45,6 +45,9 @@ REQUESTER_URL=https://your-domain.freshservice.com/api/v2/requesters
 REQUESTER_ID=your_default_requester_id
 RESPONDER_ID=your_default_responder_id
 GROUP_ID=your_default_group_id
+DOMAIN=your_freshservice_domain
+EMAIL_DOMAIN=your_domain_name
+LOCATION=your_region_location
 ```
 
 ## Usage
