@@ -62,7 +62,7 @@ class FreshServiceAPI:
             },
         )
 
-        # Check if the ticket reponse was good
+        # Check if the ticket response was good
         if response.status_code == 201:
             print(f"{type} ticket created successfully for {email}")
             return response.json()
@@ -72,12 +72,13 @@ class FreshServiceAPI:
             return None
         else:
             print(f"Failed to create ticket: {response.status_code}")
+            return None
 
     def get_requesters(
         self, output_file="requesters.json", per_page=100, max_pages=200
     ):
         """
-        Gets all of the non-agent requesters from FreshService and formats it
+        Gets all the non-agent requesters from FreshService and formats it
         in a JSON file.
         """
         all_requesters = []
