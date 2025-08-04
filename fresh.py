@@ -61,7 +61,8 @@ class FreshServiceAPI:
                 "responder_id": responder_id,  # Who the ticket should be assigned
                 "custom_fields": {
                     "please_select_the_service": category,
-                    "location": f"{os.getenv("LOCATION")}"
+                    "location": f"{os.getenv("LOCATION")}",
+                    "site": "Garrison GSN"
                 },
             },
         )
