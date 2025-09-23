@@ -1,4 +1,5 @@
 import customtkinter
+import requests
 from CTkMessagebox import CTkMessagebox
 from fresh import FreshServiceAPI
 from dotenv import load_dotenv
@@ -210,6 +211,53 @@ class App(customtkinter.CTk):
         CTkMessagebox(title="Error", message=message, icon="cancel").show()
         print(f"Error: {message}")
 
+    def show_success(self, message):
+        CTkMessagebox(title="Success", message=message, icon="check")
+        print(f"Success: {message}")
+
+    def send_to_teams(self, message, ticket_url=None, requester=None, subject=None, category=None, description=None, priority=None):
+        """
+        Sends a formatted message to Microsoft Teams using a webhook with an attachment (Adaptive Card).
+        """
+        webhook_url = os.getenv("WEBHOOK")
+        # Build a nicely formatted message using Markdown
+        card_body = [
+            {"type": "TextBlock", "text": "**New ticket created:**", "wrap": True},
+        ]
+        if requester:
+            card_body.append({"type": "TextBlock", "text": f"**Requester:** {requester}", "wrap": True})
+        if subject:
+            card_body.append({"type": "TextBlock", "text": f"**Subject:** {subject}", "wrap": True})
+        if category:
+            card_body.append({"type": "TextBlock", "text": f"**Category:** {category}", "wrap": True})
+        if priority:
+            card_body.append({"type": "TextBlock", "text": f"**Priority:** {priority}", "wrap": True})
+        if description:
+            card_body.append({"type": "TextBlock", "text": f"**Description:** {description}", "wrap": True})
+        if ticket_url:
+            card_body.append({"type": "TextBlock", "text": f"[Ticket URL]({ticket_url})", "wrap": True})
+        payload = {
+            "attachments": [
+                {
+                    "contentType": "application/vnd.microsoft.card.adaptive",
+                    "contentUrl": None,
+                    "content": {
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                        "type": "AdaptiveCard",
+                        "version": "1.0",
+                        "body": card_body
+                    }
+                }
+            ]
+        }
+        response = requests.post(webhook_url, json=payload)
+        if response.status_code == 200:
+            print("Message sent to Teams successfully.")
+            return True
+        else:
+            print(f"Failed to send message to Teams: {response.status_code}")
+            print(f"Response: {response.text}")
+            return False
 
     def create_ticket(self):
         """
@@ -266,8 +314,17 @@ class App(customtkinter.CTk):
             elif "ticket" in result and "id" in result["ticket"]:
                 ticket_id = result["ticket"]["id"]
         if ticket_id:
-            ticket_url = f"https://{os.getenv("DOMAIN")}.freshservice.com/helpdesk/tickets/{ticket_id}" #Replace 'domain' with your Freshservice domain
+            ticket_url = f"https://{os.getenv('DOMAIN')}.freshservice.com/helpdesk/tickets/{ticket_id}"  # Replace 'domain' with your Freshservice domain
             print(f"Ticket created successfully: {ticket_url}")
+            self.send_to_teams(
+                message=None,
+                ticket_url=ticket_url,
+                requester=requester_name.title(),
+                subject=f"Issue Reported by {requester_name.title()} - {category}",
+                category=category,
+                description=description,
+                priority=self.priority_selector.get()
+            )
             self.show_success("Ticket created successfully!")
         else:
             self.show_error(
@@ -305,6 +362,8 @@ class App(customtkinter.CTk):
     def show_success(self, message):
         CTkMessagebox(title="Success", message=message, icon="check")
         print(f"Success: {message}")
+
+
 
 
 if __name__ == "__main__":
