@@ -2,6 +2,7 @@ import requests
 import base64
 import os
 import json
+import threading
 
 from dotenv import load_dotenv
 
@@ -80,7 +81,7 @@ class FreshServiceAPI:
             return None
 
     def get_requesters(
-        self, output_file="requesters.json", per_page=100, max_pages=200
+        self, output_file="requesters.json", per_page=100, max_pages=200, progress_callback=None
     ):
         """
         Gets all the non-agent requesters from FreshService and formats it
@@ -91,6 +92,12 @@ class FreshServiceAPI:
         while page <= max_pages:
             url = self._build_url("requesters") + f"?page={page}&per_page={per_page}"
             print(f"[DEBUG] Fetching: {url}")
+
+            # Update progress if callback is provided
+            if progress_callback:
+                progress_text = f"Fetching page {page} of requesters..."
+                progress_callback(progress_text)
+
             response = requests.get(url, headers=self.headers)
             if response.status_code == 200:
                 data = response.json()
@@ -112,8 +119,45 @@ class FreshServiceAPI:
                 except Exception:
                     print("Response content:", response.text)
                     break
+
+        # Update progress for saving file
+        if progress_callback:
+            progress_callback("Saving requesters to file...")
+
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump({"requesters": all_requesters}, f, indent=4)
         print(f"Total requesters fetched: {len(all_requesters)}")
         print(f"Data saved to {output_file}")
+
+        # Final progress update
+        if progress_callback:
+            progress_callback("Complete!")
+
         return {"requesters": all_requesters}
+
+    def update_requester_file(self, progress_callback=None, completion_callback=None):
+        """
+        Updates the requesters.json file with the latest data from FreshService.
+        Can be called with progress and completion callbacks for UI integration.
+        """
+        def worker():
+            print("Updating requesters.json file...")
+            try:
+                result = self.get_requesters(progress_callback=progress_callback)
+                if completion_callback:
+                    completion_callback(True, "Requesters file updated successfully!")
+                return result
+            except Exception as e:
+                error_msg = f"Failed to update requesters file: {str(e)}"
+                print(error_msg)
+                if completion_callback:
+                    completion_callback(False, error_msg)
+                return None
+
+        # Run in a separate thread if callbacks are provided (UI context)
+        if progress_callback or completion_callback:
+            thread = threading.Thread(target=worker)
+            thread.daemon = True
+            thread.start()
+        else:
+            return worker()
