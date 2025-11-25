@@ -5,6 +5,8 @@ from fresh import FreshServiceAPI
 from dotenv import load_dotenv
 import json
 import os
+import threading
+import time
 
 customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -84,6 +86,88 @@ ticket_priorities = [
 ]
 
 
+class ProgressDialog(customtkinter.CTkToplevel):
+    def __init__(self, parent, title="Progress"):
+        super().__init__(parent)
+
+        # Configure window
+        self.title(title)
+        self.geometry("400x150")
+        self.resizable(False, False)
+        self.transient(parent)
+        self.grab_set()
+
+        # Center the dialog over parent
+        parent_x = parent.winfo_x()
+        parent_y = parent.winfo_y()
+        parent_width = parent.winfo_width()
+        parent_height = parent.winfo_height()
+        x = parent_x + (parent_width // 2) - 200
+        y = parent_y + (parent_height // 2) - 75
+        self.geometry(f"400x150+{x}+{y}")
+
+        # Progress label
+        self.progress_label = customtkinter.CTkLabel(
+            self,
+            text="Initializing...",
+            font=customtkinter.CTkFont("Roboto", size=14),
+            width=360
+        )
+        self.progress_label.pack(pady=20)
+
+        # Progress bar
+        self.progress_bar = customtkinter.CTkProgressBar(
+            self,
+            width=360,
+            height=20,
+            mode="indeterminate"
+        )
+        self.progress_bar.pack(pady=10)
+        self.progress_bar.start()
+
+        # Status label for completion
+        self.status_label = customtkinter.CTkLabel(
+            self,
+            text="",
+            font=customtkinter.CTkFont("Roboto", size=12),
+            width=360
+        )
+        self.status_label.pack(pady=5)
+
+        # Initially disable close button
+        self.protocol("WM_DELETE_WINDOW", self.on_close_disabled)
+
+        self.can_close = False
+
+    def update_progress(self, text):
+        """Update the progress text"""
+        self.progress_label.configure(text=text)
+        self.update()
+
+    def on_completion(self, success, message):
+        """Called when the operation completes"""
+        self.progress_bar.stop()
+        self.progress_bar.set(1.0 if success else 0.0)
+
+        if success:
+            self.progress_label.configure(text="✓ Complete!")
+            self.status_label.configure(text=message, text_color="green")
+        else:
+            self.progress_label.configure(text="✗ Failed!")
+            self.status_label.configure(text=message, text_color="red")
+
+        self.can_close = True
+        self.protocol("WM_DELETE_WINDOW", self.destroy)
+
+        # Auto-close after 2 seconds if successful
+        if success:
+            self.after(2000, self.destroy)
+
+    def on_close_disabled(self):
+        """Prevent closing while operation is in progress"""
+        pass
+
+
 class App(customtkinter.CTk):
     HEIGHT = 600
     WIDTH = 900
@@ -105,6 +189,17 @@ class App(customtkinter.CTk):
             text="Built in GSN",
         )
         self.about_label.place(x=40, y=550)
+
+        self.update_requesters_button = customtkinter.CTkButton(
+            self.left_frame,
+            width=140,
+            font=customtkinter.CTkFont("Roboto", size=12, weight="bold"),
+            text="Update Requesters",
+            fg_color="#0066cc",
+            command=self.update_requesters_with_progress,
+        )
+        self.update_requesters_button.place(x=40, y=500)
+
 
         self.main_frame = customtkinter.CTkFrame(self, width=660, height=580)
         self.main_frame.place(x=225, y=10)
@@ -379,6 +474,33 @@ class App(customtkinter.CTk):
                 if requester.get("email") == email:
                     return requester.get("id")
         return None
+
+    def update_requesters_with_progress(self):
+        """
+        Updates the requesters.json file with a progress dialog.
+        """
+        # Create and show progress dialog
+        progress_dialog = ProgressDialog(self, "Updating Requesters")
+
+        # Define progress callback
+        def progress_callback(text):
+            progress_dialog.update_progress(text)
+
+        # Define completion callback
+        def completion_callback(success, message):
+            progress_dialog.on_completion(success, message)
+            if success:
+                # Optionally show a success message
+                self.after(2500, lambda: self.show_success("Requesters updated successfully!"))
+            else:
+                # Show error message
+                self.after(2500, lambda: self.show_error(message))
+
+        # Start the update process
+        api.update_requester_file(
+            progress_callback=progress_callback,
+            completion_callback=completion_callback
+        )
 
     def clear_entries(self):  # noqa: F811
         """
