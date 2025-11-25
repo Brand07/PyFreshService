@@ -198,7 +198,7 @@ class App(customtkinter.CTk):
             fg_color="#0066cc",
             command=self.update_requesters_with_progress,
         )
-        self.update_requesters_button.place(x=40, y=500)
+        self.update_requesters_button.place(x=30, y=500)
 
 
         self.main_frame = customtkinter.CTkFrame(self, width=660, height=580)
